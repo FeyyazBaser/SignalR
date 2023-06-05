@@ -3,10 +3,16 @@ using SignalR.API.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", opt =>
+    {
+        opt.WithOrigins("https://localhost:7290/").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+    });
+});
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -20,10 +26,15 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseRouting();
+app.UseCors("CorsPolicy");
 app.UseAuthorization();
 
-app.MapHub<MyHub>("/MyHub");
 app.MapControllers();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<MyHub>("/MyHub");
+});
+
 
 app.Run();
